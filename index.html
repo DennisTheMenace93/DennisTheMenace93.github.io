@@ -43,92 +43,92 @@
   <div id="result"></div>
 
   <script>
-    const canvas = document.getElementById("wheel");
-    const ctx = canvas.getContext("2d");
-    const size = canvas.width;
-    const cx = size/2, cy = size/2, r = size/2 - 10;
+  const canvas = document.getElementById("wheel");
+  const ctx = canvas.getContext("2d");
+  const size = canvas.width;
+  const cx = size/2, cy = size/2, r = size/2 - 10;
 
-    // Segmente definieren
-    const segments = [
-      { label: "Mit mir joggen gehen", weight: 0.75, color: "#4CAF50" },
-      { label: "Kuchen backen", weight: 0.25, color: "#FF7043" }
-    ];
+  // Segmente definieren
+  const segments = [
+    { label: "Mit mir joggen gehen", weight: 0.75, color: "#4CAF50" },
+    { label: "Kuchen backen", weight: 0.25, color: "#FF7043" }
+  ];
 
-    // Start-/Endwinkel berechnen
-    let startAngle = 0;
+  // Start-/Endwinkel berechnen
+  let startAngle = 0;
+  for (let seg of segments) {
+    seg.start = startAngle;
+    seg.end = startAngle + seg.weight * 2 * Math.PI;
+    startAngle = seg.end;
+  }
+
+  function drawWheel() {
+    ctx.clearRect(0, 0, size, size);
     for (let seg of segments) {
-      seg.start = startAngle;
-      seg.end = startAngle + seg.weight * 2 * Math.PI;
-      startAngle = seg.end;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.arc(cx, cy, r, seg.start, seg.end);
+      ctx.fillStyle = seg.color;
+      ctx.fill();
+
+      // Text
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate((seg.start + seg.end) / 2);
+      ctx.textAlign = "right";
+      ctx.fillStyle = "#fff";
+      ctx.font = "16px Arial";
+      ctx.fillText(seg.label, r - 10, 5);
+      ctx.restore();
     }
+  }
 
-    function drawWheel() {
-      ctx.clearRect(0, 0, size, size);
-      for (let seg of segments) {
-        ctx.beginPath();
-        ctx.moveTo(cx, cy);
-        ctx.arc(cx, cy, r, seg.start, seg.end);
-        ctx.fillStyle = seg.color;
-        ctx.fill();
+  drawWheel();
 
-        // Text
-        ctx.save();
-        ctx.translate(cx, cy);
-        ctx.rotate((seg.start + seg.end) / 2);
-        ctx.textAlign = "right";
-        ctx.fillStyle = "#fff";
-        ctx.font = "16px Arial";
-        ctx.fillText(seg.label, r - 10, 5);
-        ctx.restore();
+  let currentRotation = 0;
+  const spinBtn = document.getElementById("spin");
+  const resultEl = document.getElementById("result");
+
+  spinBtn.addEventListener("click", () => {
+    spinBtn.disabled = true;
+    resultEl.textContent = "";
+
+    const turns = 5 + Math.random() * 3; // 5–8 Umdrehungen
+    const extra = Math.random() * 2 * Math.PI;
+    const targetRotation = currentRotation + turns * 2 * Math.PI + extra;
+
+    const duration = 4000;
+    const start = performance.now();
+
+    function animate(now) {
+      const progress = Math.min((now - start) / duration, 1);
+      const ease = 1 - Math.pow(1 - progress, 3);
+      const angle = currentRotation + (targetRotation - currentRotation) * ease;
+
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(angle);
+      ctx.translate(-cx, -cy);
+      drawWheel();
+      ctx.restore();
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        currentRotation = targetRotation % (2 * Math.PI);
+
+        // --> Hier die Korrektur:
+        const pointerAngle = (2 * Math.PI - currentRotation + (2 * Math.PI)) % (2 * Math.PI);
+        const picked = segments.find(s => pointerAngle >= s.start && pointerAngle < s.end);
+
+        resultEl.textContent = "Ergebnis: " + picked.label;
+        spinBtn.disabled = false;
       }
     }
 
-    drawWheel();
+    requestAnimationFrame(animate);
+  });
+</script>
 
-    let currentRotation = 0;
-    const spinBtn = document.getElementById("spin");
-    const resultEl = document.getElementById("result");
-
-    spinBtn.addEventListener("click", () => {
-      spinBtn.disabled = true;
-      resultEl.textContent = "";
-
-      // Zufallsdrehung
-      const turns = 5 + Math.random() * 3; // 5-8 Umdrehungen
-      const extra = Math.random() * 2 * Math.PI;
-      const targetRotation = currentRotation + turns * 2 * Math.PI + extra;
-
-      const duration = 4000;
-      const start = performance.now();
-
-      function animate(now) {
-        const progress = Math.min((now - start) / duration, 1);
-        const ease = 1 - Math.pow(1 - progress, 3); // easing
-        const angle = currentRotation + (targetRotation - currentRotation) * ease;
-
-        ctx.save();
-        ctx.translate(cx, cy);
-        ctx.rotate(angle);
-        ctx.translate(-cx, -cy);
-        drawWheel();
-        ctx.restore();
-
-        if (progress < 1) {
-          requestAnimationFrame(animate);
-        } else {
-          currentRotation = targetRotation % (2 * Math.PI);
-
-          // Berechnen, welches Feld oben am Pfeil (12 Uhr) liegt
-          const pointerAngle = (2 * Math.PI - currentRotation) % (2 * Math.PI);
-          const picked = segments.find(s => pointerAngle >= s.start && pointerAngle < s.end);
-
-          resultEl.textContent = "Ergebnis: " + picked.label;
-          spinBtn.disabled = false;
-        }
-      }
-
-      requestAnimationFrame(animate);
-    });
-  </script>
 </body>
 </html>
