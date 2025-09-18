@@ -2,133 +2,66 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>Glücksrad</title>
+  <title>Glücksrad - Korrekte Auswahl</title>
   <style>
-    body { 
-      font-family: Arial, sans-serif; 
-      display: flex; 
-      flex-direction: column; 
-      align-items: center; 
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       margin: 40px;
     }
-    canvas { 
-      border-radius: 50%; 
-    }
-    /* Pfeil-Zeiger */
     .pointer {
       width: 0; height: 0;
-      border-left: 20px solid transparent;
-      border-right: 20px solid transparent;
-      border-top: 40px solid black; /* zeigt nach unten aufs Rad */
-      margin-bottom: -10px;
-      position: relative;
-      z-index: 10;
+      border-left: 18px solid transparent;
+      border-right: 18px solid transparent;
+      border-top: 28px solid #000; /* zeigt nach unten auf das Rad */
+      margin-bottom: -12px;
+      z-index: 2;
+    }
+    canvas {
+      border-radius: 50%;
+      background: #fafafa;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.12);
     }
     button {
-      margin-top: 20px;
-      padding: 10px 20px;
+      margin-top: 18px;
+      padding: 10px 18px;
       font-size: 16px;
       cursor: pointer;
+      border-radius: 8px;
+      border: none;
+      background: #2962ff;
+      color: white;
     }
     #result {
-      margin-top: 20px;
+      margin-top: 14px;
       font-weight: bold;
+      min-height: 1.2em;
     }
   </style>
 </head>
 <body>
-  <div class="pointer"></div>
-  <canvas id="wheel" width="400" height="400"></canvas>
+  <div class="pointer" aria-hidden="true"></div>
+  <canvas id="wheel" width="420" height="420" aria-label="Glücksrad"></canvas>
   <button id="spin">Drehen</button>
   <div id="result"></div>
 
   <script>
-  const canvas = document.getElementById("wheel");
-  const ctx = canvas.getContext("2d");
-  const size = canvas.width;
-  const cx = size/2, cy = size/2, r = size/2 - 10;
+    const canvas = document.getElementById('wheel');
+    const ctx = canvas.getContext('2d');
+    const SIZE = canvas.width;
+    const cx = SIZE/2, cy = SIZE/2, r = SIZE/2 - 14;
+    const TWO_PI = Math.PI * 2;
 
-  // Segmente definieren
-  const segments = [
-    { label: "Mit mir joggen gehen", weight: 0.75, color: "#4CAF50" },
-    { label: "Kuchen backen", weight: 0.25, color: "#FF7043" }
-  ];
+    // Segmente: 75% vs 25%
+    const segments = [
+      { label: 'Mit mir joggen gehen', weight: 0.75, color: '#4CAF50' },
+      { label: 'Kuchen backen', weight: 0.25, color: '#FF7043' }
+    ];
 
-  // Start-/Endwinkel berechnen
-  let startAngle = 0;
-  for (let seg of segments) {
-    seg.start = startAngle;
-    seg.end = startAngle + seg.weight * 2 * Math.PI;
-    startAngle = seg.end;
-  }
-
-  function drawWheel() {
-    ctx.clearRect(0, 0, size, size);
-    for (let seg of segments) {
-      ctx.beginPath();
-      ctx.moveTo(cx, cy);
-      ctx.arc(cx, cy, r, seg.start, seg.end);
-      ctx.fillStyle = seg.color;
-      ctx.fill();
-
-      // Text
-      ctx.save();
-      ctx.translate(cx, cy);
-      ctx.rotate((seg.start + seg.end) / 2);
-      ctx.textAlign = "right";
-      ctx.fillStyle = "#fff";
-      ctx.font = "16px Arial";
-      ctx.fillText(seg.label, r - 10, 5);
-      ctx.restore();
-    }
-  }
-
-  drawWheel();
-
-  let currentRotation = 0;
-  const spinBtn = document.getElementById("spin");
-  const resultEl = document.getElementById("result");
-
-  spinBtn.addEventListener("click", () => {
-    spinBtn.disabled = true;
-    resultEl.textContent = "";
-
-    const turns = 5 + Math.random() * 3; // 5–8 Umdrehungen
-    const extra = Math.random() * 2 * Math.PI;
-    const targetRotation = currentRotation + turns * 2 * Math.PI + extra;
-
-    const duration = 4000;
-    const start = performance.now();
-
-    function animate(now) {
-      const progress = Math.min((now - start) / duration, 1);
-      const ease = 1 - Math.pow(1 - progress, 3);
-      const angle = currentRotation + (targetRotation - currentRotation) * ease;
-
-      ctx.save();
-      ctx.translate(cx, cy);
-      ctx.rotate(angle);
-      ctx.translate(-cx, -cy);
-      drawWheel();
-      ctx.restore();
-
-      if (progress < 1) {
-        requestAnimationFrame(animate);
-      } else {
-        currentRotation = targetRotation % (2 * Math.PI);
-
-        // --> Hier die Korrektur:
-        const pointerAngle = (2 * Math.PI - currentRotation + (2 * Math.PI)) % (2 * Math.PI);
-        const picked = segments.find(s => pointerAngle >= s.start && pointerAngle < s.end);
-
-        resultEl.textContent = "Ergebnis: " + picked.label;
-        spinBtn.disabled = false;
-      }
-    }
-
-    requestAnimationFrame(animate);
-  });
-</script>
-
-</body>
-</html>
+    // berechne Start/Endwinkel (0 = 3 Uhr, wie Canvas erwartet)
+    let acc = 0;
+    for (let s of segments) {
+      s.start = acc;
+      s.end = acc + s.weig
