@@ -16,13 +16,126 @@
     Dennis 
   </p>
 
-  <fieldset class="ui-wheel-of-fortune">
-  <ul>
-    <li>Mit mir Laufen gehen</li>
-    <li>Kuchen backen</li>
-  </ul>
-  <button type="button">SPIN</button>
-</fieldset>
+  font-family: Arial, sans-serif; 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      margin: 40px;
+    }
+    canvas { 
+      border-radius: 50%; 
+    }
+    .pointer {
+      width: 0; height: 0;
+      border-left: 15px solid transparent;
+      border-right: 15px solid transparent;
+      border-bottom: 25px solid black;
+      margin-bottom: -10px;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #result {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="pointer"></div>
+  <canvas id="wheel" width="400" height="400"></canvas>
+  <button id="spin">Drehen</button>
+  <div id="result"></div>
+
+  <script>
+    const canvas = document.getElementById("wheel");
+    const ctx = canvas.getContext("2d");
+    const size = canvas.width;
+    const cx = size/2, cy = size/2, r = size/2 - 10;
+
+    // Segmente definieren
+    const segments = [
+      { label: "Mit mir joggen gehen", weight: 0.75, color: "#4CAF50" },
+      { label: "Kuchen backen", weight: 0.25, color: "#FF7043" }
+    ];
+
+    // Start-/Endwinkel berechnen
+    let startAngle = 0;
+    for (let seg of segments) {
+      seg.start = startAngle;
+      seg.end = startAngle + seg.weight * 2 * Math.PI;
+      startAngle = seg.end;
+    }
+
+    function drawWheel() {
+      ctx.clearRect(0, 0, size, size);
+      for (let seg of segments) {
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.arc(cx, cy, r, seg.start, seg.end);
+        ctx.fillStyle = seg.color;
+        ctx.fill();
+
+        // Text
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate((seg.start + seg.end) / 2);
+        ctx.textAlign = "right";
+        ctx.fillStyle = "#fff";
+        ctx.font = "16px Arial";
+        ctx.fillText(seg.label, r - 10, 5);
+        ctx.restore();
+      }
+    }
+
+    drawWheel();
+
+    let currentRotation = 0;
+    const spinBtn = document.getElementById("spin");
+    const resultEl = document.getElementById("result");
+
+    spinBtn.addEventListener("click", () => {
+      spinBtn.disabled = true;
+      resultEl.textContent = "";
+
+      // Zufallsdrehung
+      const turns = 5 + Math.random() * 3; // 5-8 Umdrehungen
+      const extra = Math.random() * 2 * Math.PI;
+      const targetRotation = currentRotation + turns * 2 * Math.PI + extra;
+
+      const duration = 4000;
+      const start = performance.now();
+
+      function animate(now) {
+        const progress = Math.min((now - start) / duration, 1);
+        const ease = 1 - Math.pow(1 - progress, 3); // easing
+        const angle = currentRotation + (targetRotation - currentRotation) * ease;
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(angle);
+        ctx.translate(-cx, -cy);
+        drawWheel();
+        ctx.restore();
+
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          currentRotation = targetRotation % (2 * Math.PI);
+          const picked = segments.find(s => {
+            const pointerAngle = (2 * Math.PI - currentRotation) % (2 * Math.PI);
+            return pointerAngle >= s.start && pointerAngle < s.end;
+          });
+          resultEl.textContent = "Ergebnis: " + picked.label;
+          spinBtn.disabled = false;
+        }
+      }
+
+      requestAnimationFrame(animate);
+    });
+  </script>
   
 </body>
 </html>
