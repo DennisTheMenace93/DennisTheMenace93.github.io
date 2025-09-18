@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>Glücksrad - Korrekte Auswahl bei Pfeil</title>
+  <title>Glücksrad - Korrekte Auswahl 12 Uhr</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -60,7 +60,7 @@
       { label: 'Kuchen backen', weight: 0.25, color: '#FF7043' }
     ];
 
-    // berechne Start/Endwinkel (0 = 3 Uhr, wie Canvas erwartet)
+    // Start-/Endwinkel berechnen
     let acc = 0;
     for (let s of segments) {
       s.start = acc;
@@ -137,7 +137,7 @@
       btn.disabled = true;
       resultEl.textContent = '';
 
-      const turns = 4 + Math.floor(Math.random() * 4); // 4..7 Umdrehungen
+      const turns = 4 + Math.floor(Math.random() * 4); // 4–7 volle Umdrehungen
       const extra = Math.random() * TWO_PI;
       const targetRotation = currentRotation + turns * TWO_PI + extra;
       const duration = 4200;
@@ -155,18 +155,18 @@
         } else {
           currentRotation = normalize(targetRotation);
 
-          // NEU: Auswahl des Segments bei 0° / 12 Uhr (Pfeil)
-          const pointerAngle = normalize(TWO_PI - currentRotation); // 0° oben
+          // KORREKTE BERECHNUNG: Segment unter Pfeil bei 12 Uhr (0°)
+          const pointerAngle = normalize(-Math.PI/2 - currentRotation); // Pfeil oben
           let pickedIndex = segments.findIndex(s => {
             if (s.start < s.end) {
               return pointerAngle >= s.start && pointerAngle < s.end;
-            } else { // wrap-around
+            } else {
               return pointerAngle >= s.start || pointerAngle < s.end;
             }
           });
           if (pickedIndex === -1) pickedIndex = 0;
 
-          // kurzes Flash/Hervorheben
+          // Hervorheben
           let flashes = 0;
           const maxFlashes = 4;
           const flashInterval = 220;
