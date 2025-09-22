@@ -1,3 +1,4 @@
+<!--
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -198,5 +199,75 @@
     </br></br></br>Rechtliche Hinweise: Die Festlegung einer Sanktion infolge wiederholter Parkverstöße kann nach den Grundsätzen von Treu und Glauben (§ 242 BGB) sowie der privatautonomen Gestaltungsmacht der Beteiligten erfolgen. Dabei ist es den Parteien unbenommen, Art und Umfang der Sanktion durch ein vereinbartes Zufallsverfahren, namentlich die Nutzung eines Glücksrads, zu bestimmen.
     Das Verfahren entspricht den Anforderungen an Transparenz und Gleichbehandlung, da die möglichen Sanktionen im Vorfeld klar definiert sind und das Zufallselement eine sachgerechte und nicht willkürliche Auswahl gewährleistet. Somit ist die Heranziehung eines Glücksrads zur Bestimmung der Sanktion rechtlich zulässig und verbindlich.
   </p>
+</body>
+</html>
+-->
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Backe Backe Kuchen</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 40px;
+    }
+    #cheesecake {
+      max-width: 90%;
+      height: auto;
+      filter: blur(18px);
+      transition: filter 2s ease; /* Übergangseffekt 2s */
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 18px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 8px;
+      border: none;
+      background: #2962ff;
+      color: white;
+    }
+    #result {
+      margin-top: 20px;
+      font-weight: bold;
+      font-size: 22px;
+      min-height: 1.2em;
+    }
+  </style>
+</head>
+<body>
+  <p>
+    Backe Backe Kuchen, der Dennis hat gerufen. Laura will ihm guten Kuchen backen und braucht dafür sieben Sachen. Willst du die Zutaten wissen, darfst du den Knopf nicht missen.
+  </p>
+  <h2>Ihre Sanktion</h2>
+  <img id="cheesecake" src="Kuchen.jpeg" alt="Lotus Cheesecake">
+  <button id="reveal">Ergebnis anzeigen</button>
+  <div id="result"></div>
+
+  <script>
+    const img = document.getElementById("cheesecake");
+    const btn = document.getElementById("reveal");
+    const resultEl = document.getElementById("result");
+
+    btn.addEventListener("click", () => {
+      btn.disabled = true;
+      resultEl.textContent = "";
+
+      // kleine Verzögerung für Spannung
+      setTimeout(() => {
+        img.style.filter = "blur(0px)";
+      }, 500); // nach 0,5 Sekunden Übergang starten
+
+      // Text nach Ende der Animation einblenden
+      setTimeout(() => {
+        resultEl.textContent = "Lotus Cheesecake";
+      }, 2700); // 0,5s warten + 2s Übergang + 0,2s Puffer
+    });
+  </script>
+
 </body>
 </html>
